@@ -2,6 +2,7 @@
 module AnsiParser.FrontEnd.Parse where
 
 import AnsiParser.Types
+import AnsiParser.FrontEnd.Lex
 }
 
 %name expr
@@ -29,8 +30,8 @@ exprs
 
 expr :: { Expr }
 expr
-  : PLAIN { Plain $1 }
-  | '\x27' cmd { Cmd $1 }
+  : PLAIN { Word $1 }
+  | '\x27' cmd { Cmd $2 }
 
 
 
@@ -38,7 +39,7 @@ cmd :: { Cmd }
 cmd
   : '[' csi { undefined }
   | ']' osc { undefined }
-  | CHAR { parseChar $1 }
+  | CHAR { C1 $ parseChar $1 }
 
 
 csi :: { Cmd }
@@ -49,10 +50,11 @@ osc : { undefined }
 
 
 {
-parseChar :: TokenChar -> C1
+parseChar :: Char -> C1
 parseChar 'D' = Index
 parseChar 'E' = NextLine
 parseChar 'H' = TabSet
 parseChar  _ = undefined -- TODO
 
+parseError = undefined
 }

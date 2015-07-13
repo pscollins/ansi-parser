@@ -79,12 +79,14 @@ data C1
   | EndString
   | PrivacyMessage
   | APC -- Application program command
+  deriving (Show, Eq)
 
 data Cmd
   = CSI Char [String] -- Control Sequence (Initiator)
   | SGR [ColorCmd] -- Select Graphic Rendition i.e. colors, fonts
   | OSC OSCmd -- Operating System Command
   | Single ControlChar
+  | C1 C1
   deriving (Show, Eq)
 
 
