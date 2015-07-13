@@ -15,8 +15,8 @@ import Data.String (IsString)
 -- instance ConsoleString B.ByteString where
 --   isEscape = ('\x27' `B.elem`)
 
-data ConsoleString a => Expr a
-  = Plain a
+-- data ConsoleString a => Expr a
+--   = Plain a
 
 data Color
   = Black
@@ -62,6 +62,7 @@ data ControlChar
   | Space
   | HorizontalTab
   | VerticalTab
+  deriving (Show, Eq)
 
 data C1
   = Index
@@ -83,11 +84,11 @@ data Cmd
   = CSI Char [String] -- Control Sequence (Initiator)
   | SGR [ColorCmd] -- Select Graphic Rendition i.e. colors, fonts
   | OSC OSCmd -- Operating System Command
-  | Single SingleChar
+  | Single ControlChar
   deriving (Show, Eq)
+
 
 data Expr
   = Word String
-  |
   | Cmd Cmd
   deriving (Show, Eq)

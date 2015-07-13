@@ -1,5 +1,5 @@
 {
-module Main where
+module AnsiParser.FrontEnd.Parse where
 
 import AnsiParser.Types
 }
@@ -39,6 +39,13 @@ cmd
   : '[' csi { undefined }
   | ']' osc { undefined }
   | CHAR { parseChar $1 }
+
+
+csi :: { Cmd }
+csi : { undefined }
+
+osc :: { Cmd }
+osc : { undefined }
 
 
 {
