@@ -27,4 +27,7 @@ data Token
   | TokenChar Char
   | TokenPlain String
   | TokenNum Int
+  deriving (Show)
+
+scanTokens = alexScanTokens
 }

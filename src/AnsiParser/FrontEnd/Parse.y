@@ -57,4 +57,5 @@ parseChar 'H' = TabSet
 parseChar  _ = undefined -- TODO
 
 parseError = undefined
+scanTokens = alexScanTokens
 }
