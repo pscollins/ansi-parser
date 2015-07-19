@@ -35,7 +35,7 @@ data ColorPos
   deriving (Show, Eq)
 
 data ColorCmd
-  = Reset -- other stuff to, TODO
+  = DefaultColor -- other stuff to, TODO
   | Bold
   | Set (Color, ColorPos)
   deriving (Show, Eq)
@@ -91,6 +91,6 @@ data Cmd
 
 
 data Expr
-  = Word String
+  = Plain String
   | Cmd Cmd
   deriving (Show, Eq)

@@ -5,7 +5,7 @@ import AnsiParser.Types
 import AnsiParser.FrontEnd.Lex
 }
 
-%name expr
+%name parseTokens
 %tokentype { Token }
 %error { parseError }
 
@@ -14,6 +14,7 @@ import AnsiParser.FrontEnd.Lex
   ';' { TokenSep }
   '[' { TokenLBracket }
   ']' { TokenRBracket }
+  'm' { TokenEndColorCmd }
   PLAIN { TokenPlain $$ }
   NUM { TokenNum $$ }
   CHAR { TokenChar $$ }
@@ -30,20 +31,29 @@ exprs
 
 expr :: { Expr }
 expr
-  : PLAIN { Word $1 }
+  : PLAIN { Plain $1 }
   | '\x27' cmd { Cmd $2 }
 
+numparams :: { [Int] }
+numparams
+  : {- empty -} { [] }
+  | NUM ';' numparams { $1 : $3 }
 
+colorcmd :: { [ColorCmd] }
+colorcmd
+  : numparams 'm' { map parseColorParam $1 }
 
 cmd :: { Cmd }
 cmd
-  : '[' csi { undefined }
-  | ']' osc { undefined }
+  : '[' csi { $2 }
   | CHAR { C1 $ parseChar $1 }
+  -- | ']' osc { undefined }
+
 
 
 csi :: { Cmd }
-csi : { undefined }
+csi
+  : colorcmd { SGR $1 }
 
 osc :: { Cmd }
 osc : { undefined }
@@ -56,6 +66,11 @@ parseChar 'E' = NextLine
 parseChar 'H' = TabSet
 parseChar  _ = undefined -- TODO
 
-parseError = undefined
-scanTokens = alexScanTokens
+
+parseColorParam :: Int -> ColorCmd
+parseColorParam 0 = DefaultColor
+
+parseError tokens = error ("Error!" ++ show tokens)
+
+
 }

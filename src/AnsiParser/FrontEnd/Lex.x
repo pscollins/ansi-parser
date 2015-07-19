@@ -16,6 +16,7 @@ tokens :-
   $sep { \s -> TokenSep }
   [^$esc]+ { \s -> TokenPlain s } -- FIXME: play better with controlchar
   $digit+ { \s -> TokenNum $ read s }
+  m { \s -> TokenEndColorCmd }
   [DEHMNOPVWXZ\^_] { \s -> TokenChar $ read s }
 
 {
@@ -27,6 +28,7 @@ data Token
   | TokenChar Char
   | TokenPlain String
   | TokenNum Int
+  | TokenEndColorCmd
   deriving (Show)
 
 scanTokens = alexScanTokens
