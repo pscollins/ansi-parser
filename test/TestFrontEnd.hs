@@ -23,5 +23,8 @@ main = hspec $ do
     it "does not split words" $
       "Hello World" `parsesTo` Plain "Hello World"
   describe "SGR" $ do
-    it "parses reset" $ do
+    it "parses reset" $
       "\x27[0;m" `parsesTo` Cmd (SGR [DefaultColor])
+  describe "C1" $ do
+    it "parses index" $
+      "\x27D" `parsesTo` Cmd (C1 Index)
