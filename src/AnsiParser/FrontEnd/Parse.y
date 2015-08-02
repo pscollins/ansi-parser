@@ -3,10 +3,14 @@ module AnsiParser.FrontEnd.Parse where
 
 import AnsiParser.Types
 import AnsiParser.FrontEnd.Lex
+
+import Debug.Trace
 }
 
 %name parseTokens
 %tokentype { Token }
+%lexer { lexWrap } { alexEOF }
+%monad { Alex }
 %error { parseError }
 
 %token
@@ -25,14 +29,15 @@ import AnsiParser.FrontEnd.Lex
 -- confuses me
 exprs :: { [Expr] }
 exprs
-  : {- empty -} { [] }
-  | expr exprs { $1 : $2 }
+  : {- empty -} { trace "exprs 30" [] }
+  | expr exprs { trace "exprs 31" $ $1 : $2 }
 
 
 expr :: { Expr }
 expr
-  : PLAIN { Plain $1 }
-  | '\x27' cmd { Cmd $2 }
+  : '\x27' cmd { trace "expr 36" $ Cmd $2 }
+  | PLAIN { trace "expr 37" $ Plain $1 }
+
 
 numparams :: { [Int] }
 numparams
@@ -60,17 +65,19 @@ osc : { undefined }
 
 
 {
-parseChar :: Char -> C1
-parseChar 'D' = Index
-parseChar 'E' = NextLine
-parseChar 'H' = TabSet
-parseChar  _ = undefined -- TODO
+-- parseChar :: Char -> C1
+-- parseChar 'D' = Index
+-- parseChar 'E' = NextLine
+-- parseChar 'H' = TabSet
+-- parseChar  _ = undefined -- TODO
 
 
-parseColorParam :: Int -> ColorCmd
-parseColorParam 0 = DefaultColor
+-- parseColorParam :: Int -> ColorCmd
+-- parseColorParam 0 = DefaultColor
 
-parseError tokens = error ("Error!" ++ show tokens)
+-- parseError :: [Token] -> Alex a
+-- parseError tokens = error ("Error!" ++ show tokens)
 
-
+-- parse :: String -> Either String [Expr]
+-- parse s = runAlex s parseTokens
 }

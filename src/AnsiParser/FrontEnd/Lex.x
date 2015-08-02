@@ -4,7 +4,7 @@ module AnsiParser.FrontEnd.Lex where
 
 -- Following http://invisible-island.net/xterm/ctlseqs/ctlseqs.html
 
-%wrapper "basic"
+%wrapper "monad"
 
 $digit = 0-9
 $esc = \x027
@@ -29,7 +29,15 @@ data Token
   | TokenPlain String
   | TokenNum Int
   | TokenEndColorCmd
+  | TokenEOF
   deriving (Show)
 
-scanTokens = alexScanTokens
+scanTokens :: Alex Token
+scanTokens = alexMonadScan
+
+lexWrap :: (Token -> Alex a) -> Alex a
+lexWrap = (alexMonadScan >>=)
+
+alexEOF :: Alex Token
+alexEOF = return TokenEOF
 }
