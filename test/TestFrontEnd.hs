@@ -6,8 +6,11 @@ import AnsiParser.Types
 import AnsiParser.FrontEnd.Lex (scanTokens)
 import AnsiParser.FrontEnd.Parse
 
+import Debug.Trace
+
 parse :: String -> [Expr]
-parse = parseTokens . scanTokens
+parse s = trace (show res) res
+  where Right res = trace (show $ parseExpr s) $ parseExpr s
 
 parsesToEs :: String -> [Expr] -> Expectation
 parsesToEs s r = parse s `shouldBe` r

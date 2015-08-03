@@ -1,5 +1,7 @@
 {
 module AnsiParser.FrontEnd.Lex where
+
+import Debug.Trace
 }
 
 -- Following http://invisible-island.net/xterm/ctlseqs/ctlseqs.html
@@ -12,13 +14,12 @@ $sep = \;
 
 
 tokens :-
-  $esc { \s -> TokenEsc }
-  $sep { \s -> TokenSep }
-  [^$esc]+ { \s -> TokenPlain s } -- FIXME: play better with controlchar
-  $digit+ { \s -> TokenNum $ read s }
-  m { \s -> TokenEndColorCmd }
-  [DEHMNOPVWXZ\^_] { \s -> TokenChar $ read s }
-
+  $esc { mkT' TokenEsc `andBegin` ctrl }
+  <ctrl> $sep { mkT' TokenSep }
+  <ctrl> $digit+ { mkT $ TokenNum . read }
+  <ctrl> m { mkT' TokenEndColorCmd `andBegin` 0 }
+  <ctrl> [DEHMNOPVWXZ\^_] { mkT $ TokenChar . read }
+  [^$esc]+ { mkT TokenPlain } -- FIXME: play better with controlcha r
 {
 data Token
   = TokenEsc
@@ -32,11 +33,17 @@ data Token
   | TokenEOF
   deriving (Show)
 
-scanTokens :: Alex Token
+scanTokens ::  Alex Token
 scanTokens = alexMonadScan
 
 lexWrap :: (Token -> Alex a) -> Alex a
 lexWrap = (alexMonadScan >>=)
+
+mkT :: (AlexInput -> Token) -> AlexInput -> Int -> Alex Token
+mkT tokFn toTok _ _ = return $ tokFn toTok
+
+mkT' :: Token -> AlexInput -> Int -> Alex Token
+mkT' tok = mkT (const tok)
 
 alexEOF :: Alex Token
 alexEOF = return TokenEOF

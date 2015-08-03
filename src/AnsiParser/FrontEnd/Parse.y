@@ -35,7 +35,7 @@ exprs
 
 expr :: { Expr }
 expr
-  : '\x27' cmd { trace "expr 36" $ Cmd $2 }
+  : '\x27'cmd { trace "expr 36" $ Cmd $2 }
   | PLAIN { trace "expr 37" $ Plain $1 }
 
 
@@ -65,19 +65,22 @@ osc : { undefined }
 
 
 {
--- parseChar :: Char -> C1
--- parseChar 'D' = Index
--- parseChar 'E' = NextLine
--- parseChar 'H' = TabSet
--- parseChar  _ = undefined -- TODO
+parseChar :: Char -> C1
+parseChar 'D' = Index
+parseChar 'E' = NextLine
+parseChar 'H' = TabSet
+parseChar  _ = undefined -- TODO
 
 
--- parseColorParam :: Int -> ColorCmd
--- parseColorParam 0 = DefaultColor
+parseColorParam :: Int -> ColorCmd
+parseColorParam 0 = DefaultColor
 
--- parseError :: [Token] -> Alex a
--- parseError tokens = error ("Error!" ++ show tokens)
+parseError :: Token -> Alex a
+parseError tokens = error ("Error!" ++ show tokens)
 
--- parse :: String -> Either String [Expr]
--- parse s = runAlex s parseTokens
+-- parseExpr :: String -> [Expr]
+-- parseExpr = parseTokens . scanTokens
+
+parseExpr :: String -> Either String [Expr]
+parseExpr s = runAlex s parseTokens
 }
