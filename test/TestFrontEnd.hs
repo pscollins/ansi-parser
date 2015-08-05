@@ -3,14 +3,33 @@ module Main where
 import Test.Hspec
 
 import AnsiParser.Types
-import AnsiParser.FrontEnd.Lex (scanTokens)
+import AnsiParser.FrontEnd.Lex
 import AnsiParser.FrontEnd.Parse
+
+import Control.Monad
 
 import Debug.Trace
 
 parse :: String -> [Expr]
 parse s = trace (show res) res
   where Right res = trace (show $ parseExpr s) $ parseExpr s
+
+lexStr :: String -> Either String [Token]
+lexStr = alexScanTokens
+
+lexTo :: String -> [Token] -> Expectation
+lexTo inp outp = lexStr inp `shouldBe` Right outp
+
+noLex :: String -> String -> Expectation
+noLex inp outp = lexStr inp `shouldBe` Left outp
+
+-- foldingLexer :: Alex [Token]
+-- foldingLexer = ((liftM (:[]) scanTokens))
+
+-- doscanTokens :: String -> [Token]
+-- doscanTokens s = alexScanTokens s
+
+-- lexStrs :: [String] -> [Either
 
 parsesToEs :: String -> [Expr] -> Expectation
 parsesToEs s r = parse s `shouldBe` r
@@ -20,6 +39,23 @@ parsesTo s r = s `parsesToEs` [r]
 
 main :: IO ()
 main = hspec $ do
+  describe "lexer" $ do
+    it "lexes the empty string" $
+      "" `lexTo` [TokenEOF]
+    it "lexes an escape char" $
+      "\x27" `lexTo` [TokenEsc, TokenEOF]
+    it "lexes an esc with other stuff" $
+      "\x27\&15;" `lexTo` [TokenEsc, TokenNum 15, TokenSep, TokenEOF]
+    it "lexes a color command" $
+      "\x27[\&15;8m" `lexTo` [ TokenEsc, TokenLBracket, TokenNum 15
+                             , TokenSep, TokenNum 8, TokenEndColorCmd
+                             , TokenEOF ]
+
+    it "lexes a single char function" $
+      "\x27\&D" `lexTo` [TokenEsc, TokenChar 'D', TokenEOF]
+    it "lexes a nonprinting char" $
+      "\x7" `lexTo` [TokenNonPrint '\x7', TokenEOF]
+
   describe "plain text" $ do
     it "parses the empty string" $
       "" `parsesToEs` []
