@@ -21,7 +21,7 @@ import Debug.Trace
   'm' { TokenEndColorCmd }
   PLAIN { TokenPlain $$ }
   NUM { TokenNum $$ }
-  CHAR { TokenChar $$ }
+  CHAR { TokenCharFunc $$ }
 
 %%
 

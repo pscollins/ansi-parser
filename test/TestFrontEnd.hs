@@ -52,18 +52,36 @@ main = hspec $ do
                              , TokenEOF ]
 
     it "lexes a single char function" $
-      "\x27\&D" `lexTo` [TokenEsc, TokenChar 'D', TokenEOF]
+      "\x27\&D" `lexTo` [TokenEsc, TokenCharFunc 'D', TokenEOF]
     it "lexes a nonprinting char" $
       "\x7" `lexTo` [TokenNonPrint '\x7', TokenEOF]
+    it "lexes an ANSI set command" $
+      "\x27 F" `lexTo` [TokenEsc, TokenSP, TokenAnsiSet 'F', TokenEOF]
+    it "lexes a DEC line command" $
+      "\x27#3" `lexTo` [TokenEsc, TokenHash, TokenDECLine 3, TokenEOF]
+    it "lexes a simple char set command" $
+      "\x27%@" `lexTo` [ TokenEsc, TokenPercent, TokenSimpleCharSet '@'
+                       , TokenEOF]
+    it "lexes a char set command" $
+      "\x27(0" `lexTo` [TokenEsc, TokenLParen, TokenCharSet "0", TokenEOF]
+    it "lexes an extended char set command" $
+      "\x27/A" `lexTo` [TokenEsc, TokenDiv, TokenCharSet "A", TokenEOF]
+    it "lexes a cursor command" $
+      "\x27\&6" `lexTo` [TokenEsc, TokenCursorCmd '6', TokenEOF]
+    it "lexes an invoke char set" $
+      "\x27n" `lexTo` [TokenEsc, TokenInvokeCharSet 'n', TokenEOF]
+    -- it
 
-  describe "plain text" $ do
-    it "parses the empty string" $
-      "" `parsesToEs` []
-    it "does not split words" $
-      "Hello World" `parsesTo` Plain "Hello World"
-  describe "SGR" $ do
-    it "parses reset" $
-      "\x27[0;m" `parsesTo` Cmd (SGR [DefaultColor])
-  describe "C1" $ do
-    it "parses index" $
-      "\x27\&D" `parsesTo` Cmd (C1 Index)
+
+
+  -- describe "plain text" $ do
+  --   it "parses the empty string" $
+  --     "" `parsesToEs` []
+  --   it "does not split words" $
+  --     "Hello World" `parsesTo` Plain "Hello World"
+  -- describe "SGR" $ do
+  --   it "parses reset" $
+  --     "\x27[0;m" `parsesTo` Cmd (SGR [DefaultColor])
+  -- describe "C1" $ do
+  --   it "parses index" $
+  --     "\x27\&D" `parsesTo` Cmd (C1 Index)
