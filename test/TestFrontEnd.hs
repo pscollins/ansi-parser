@@ -70,7 +70,12 @@ main = hspec $ do
       "\x27\&6" `lexTo` [TokenEsc, TokenCursorCmd '6', TokenEOF]
     it "lexes an invoke char set" $
       "\x27n" `lexTo` [TokenEsc, TokenInvokeCharSet 'n', TokenEOF]
-    -- it
+    it "lexes a user defined key command" $
+      "\x27P10;11|foo\x27\\" `lexTo` [ TokenDCS, TokenNum 10, TokenSep
+                                     , TokenNum 11 , TokenPipe
+                                     , TokenStringParam "foo"
+                                     , TokenStringTerm, TokenEOF]
+
 
 
 

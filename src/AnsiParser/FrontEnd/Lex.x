@@ -16,10 +16,10 @@ $sp = \ -- a literal space character
 $lp = \(
 $rp = \)
 
-
 @digit = [0-9]
 @nonprint = [\x0-\x1f]
-@singlecharfunc = [DEHMNOPVWXZ\^_]
+@print = [\ -\~]
+@singlecharfunc = [DEHMNOVWXZ\^_]
 @ansiset = [FGLMN]
 @charsetcmd = [0\<\>AB4CRQKY`E65f9ZH7=]|(\%(5|6))
 
@@ -29,7 +29,7 @@ tokens :-
   $esc { mkT' TokenEsc `andBegin` ctrl }
   @nonprint { mkTChar TokenNonPrint }
 
-  <ctrl>  @singlecharfunc { mkTChar TokenCharFunc }
+  <ctrl>  @singlecharfunc {mkTChar TokenCharFunc `andBegin` 0}
 
   <ctrl> $sp { mkT' TokenSP  `andBegin` ansiset }
   <ansiset> @ansiset { mkTChar TokenAnsiSet  `andBegin` 0 }
@@ -57,8 +57,15 @@ tokens :-
   <ctrl> \[ { mkT' TokenLBracket `andBegin` csi }
   <csi> m { mkT' TokenEndColorCmd `andBegin` 0 }
 
-  <ctrl,csi> $sep { mkT' TokenSep }
-  <ctrl,csi> @digit+ { mkT $ TokenNum . read }
+  <0> \x27P {mkT' TokenDCS `andBegin` dcs}
+
+  <dcs> \| {mkT' TokenPipe `andBegin` string}
+
+  <string> @print+ {mkT TokenStringParam `andBegin` 0}
+  <string> \x27\\ {mkT' TokenStringTerm `andBegin` 0}
+
+  <ctrl,csi,dcs> $sep { mkT' TokenSep }
+  <ctrl,csi,dcs> @digit+ { mkT $ TokenNum . read }
 
   <0> [^$esc]+ { mkT TokenPlain }
 {
@@ -88,6 +95,10 @@ data Token
   | TokenCursorCmd Char
   | TokenInvokeCharSet Char
   | TokenEndColorCmd
+  | TokenStringParam String
+  | TokenPipe
+  | TokenStringTerm
+  | TokenDCS
   | TokenEOF
   deriving (Show, Eq)
 
