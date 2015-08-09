@@ -10,15 +10,17 @@ import Debug.Trace
 
 %wrapper "monad"
 
-$esc = \x027
+$esc = \x1b
 $sep = \;
 $sp = \ -- a literal space character
 $lp = \(
 $rp = \)
+$nonprint = \x0-\x1f
+
 
 @digit = [0-9]
-@nonprint = [\x0-\x1f]
-@print = [\ -\~]
+
+
 @singlecharfunc = [DEHMNOVWXZ\^_]
 @ansiset = [FGLMN]
 @charsetcmd = [0\<\>AB4CRQKY`E65f9ZH7=]|(\%(5|6))
@@ -26,8 +28,8 @@ $rp = \)
 
 
 tokens :-
-  $esc { mkT' TokenEsc `andBegin` ctrl }
-  @nonprint { mkTChar TokenNonPrint }
+  <0> $esc { mkT' TokenEsc `andBegin` ctrl }
+  $nonprint { mkTChar TokenNonPrint }
 
   <ctrl>  @singlecharfunc {mkTChar TokenCharFunc `andBegin` 0}
 
@@ -57,12 +59,15 @@ tokens :-
   <ctrl> \[ { mkT' TokenLBracket `andBegin` csi }
   <csi> m { mkT' TokenEndColorCmd `andBegin` 0 }
 
-  <0> \x27P {mkT' TokenDCS `andBegin` dcs}
+  <ctrl> P {mkT' TokenDCS `andBegin` dcs}
 
   <dcs> \| {mkT' TokenPipe `andBegin` string}
+  <dcs> \$ {mkT' TokenDollar `andBegin` string}
+  <dcs> \+ {mkT' TokenPlus `andBegin` string}
 
-  <string> @print+ {mkT TokenStringParam `andBegin` 0}
-  <string> \x27\\ {mkT' TokenStringTerm `andBegin` 0}
+  <string> $printable+ {mkT TokenStringParam}
+  <string> $esc\\ {mkT' TokenStringTerm `andBegin` 0}
+
 
   <ctrl,csi,dcs> $sep { mkT' TokenSep }
   <ctrl,csi,dcs> @digit+ { mkT $ TokenNum . read }
@@ -98,6 +103,7 @@ data Token
   | TokenStringParam String
   | TokenPipe
   | TokenStringTerm
+  | TokenDollar
   | TokenDCS
   | TokenEOF
   deriving (Show, Eq)
