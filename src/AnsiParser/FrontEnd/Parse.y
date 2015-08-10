@@ -18,7 +18,7 @@ import Debug.Trace
   ';' { TokenSep }
   '[' { TokenLBracket }
   ']' { TokenRBracket }
-  'm' { TokenEndColorCmd }
+  'm' { TokenEndCSI 'm' Nothing }
   PLAIN { TokenPlain $$ }
   NUM { TokenNum $$ }
   CHAR { TokenCharFunc $$ }

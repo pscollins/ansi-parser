@@ -48,7 +48,7 @@ main = hspec $ do
       "\x1b\&15;" `lexTo` [TokenEsc, TokenNum 15, TokenSep, TokenEOF]
     it "lexes a color command" $
       "\x1b[\&15;8m" `lexTo` [ TokenEsc, TokenLBracket, TokenNum 15
-                             , TokenSep, TokenNum 8, TokenEndColorCmd
+                             , TokenSep, TokenNum 8, TokenEndCSI 'm' Nothing
                              , TokenEOF ]
 
     it "lexes a single char function" $
