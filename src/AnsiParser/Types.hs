@@ -50,19 +50,19 @@ data OSCmd
   | Font String
   deriving (Show, Eq)
 
-data ControlChar
-  = Bell
-  | Backspace
-  | CarriageReturn
-  | Enq -- Return terminal status
-  | NewPage
-  | NewLine
-  | ShiftIn
-  | ShiftOut
-  | Space
-  | HorizontalTab
-  | VerticalTab
-  deriving (Show, Eq)
+-- data ControlChar
+--   = Bell
+--   | Backspace
+--   | CarriageReturn
+--   | Enq -- Return terminal status
+--   | NewPage
+--   | NewLine
+--   | ShiftIn
+--   | ShiftOut
+--   | Space
+--   | HorizontalTab
+--   | VerticalTab
+--   deriving (Show, Eq)
 
 data C1
   = Index
@@ -85,10 +85,22 @@ data Cmd
   = CSI Char [String] -- Control Sequence (Initiator)
   | SGR [ColorCmd] -- Select Graphic Rendition i.e. colors, fonts
   | OSC OSCmd -- Operating System Command
-  | Single ControlChar
+  | NonPrint NonPrint -- A nonprinting character
   | C1 C1
   deriving (Show, Eq)
 
+
+data NonPrint
+  = Bell
+  | Backspace
+  | CarriageReturn
+  | Enquiry
+  | FormFeed
+  | LineFeed
+  | ShiftIn
+  | ShiftOut
+  | VerticalTab
+  deriving (Show, Eq)
 
 data Expr
   = Plain String

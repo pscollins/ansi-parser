@@ -10,9 +10,9 @@ import Control.Monad
 
 import Debug.Trace
 
-parse :: String -> [Expr]
-parse s = trace (show res) res
-  where Right res = trace (show $ parseExpr s) $ parseExpr s
+parse :: String -> Either String [Expr]
+parse s = trace ("Parsing: " ++ show res) res
+  where res = parseExpr s
 
 lexStr :: String -> Either String [Token]
 lexStr = alexScanTokens
@@ -23,19 +23,11 @@ lexTo inp outp = lexStr inp `shouldBe` Right outp
 noLex :: String -> String -> Expectation
 noLex inp outp = lexStr inp `shouldBe` Left outp
 
--- foldingLexer :: Alex [Token]
--- foldingLexer = ((liftM (:[]) scanTokens))
+parseToEs :: String -> [Expr] -> Expectation
+parseToEs s r = parse s `shouldBe` Right r
 
--- doscanTokens :: String -> [Token]
--- doscanTokens s = alexScanTokens s
-
--- lexStrs :: [String] -> [Either
-
-parsesToEs :: String -> [Expr] -> Expectation
-parsesToEs s r = parse s `shouldBe` r
-
-parsesTo :: String -> Expr -> Expectation
-parsesTo s r = s `parsesToEs` [r]
+parseTo :: String -> Expr -> Expectation
+parseTo s r = s `parseToEs` [r]
 
 main :: IO ()
 main = hspec $ do
@@ -83,18 +75,26 @@ main = hspec $ do
       "\x1bP+pFOO\x1b\&\\" `lexTo` [ TokenEsc, TokenDCS, TokenPlus
                                    , TokenStringParam "pFOO"
                                    , TokenStringTerm, TokenEOF ]
+    it "lexes a CSI command" $
+      "\x1b[10@" `lexTo` [ TokenEsc, TokenLBracket, TokenNum 10
+                           , TokenEndCSI '@' Nothing, TokenEOF ]
+    it "lexes plain text" $
+      "Hello World" `lexTo` [TokenPlain "Hello World", TokenEOF]
 
 
 
 
-  -- describe "plain text" $ do
-  --   it "parses the empty string" $
-  --     "" `parsesToEs` []
-  --   it "does not split words" $
-  --     "Hello World" `parsesTo` Plain "Hello World"
-  -- describe "SGR" $ do
-  --   it "parses reset" $
-  --     "\x1b[0;m" `parsesTo` Cmd (SGR [DefaultColor])
-  -- describe "C1" $ do
-  --   it "parses index" $
-  --     "\x1b\&D" `parsesTo` Cmd (C1 Index)
+  describe "plain text" $ do
+    it "parses the empty string" $
+      "" `parseToEs` []
+    it "parses plain text" $
+      "Hello World" `parseTo` Plain "Hello World"
+  describe "cmd" $ do
+    it "parses a nonprinting character" $
+      "\x7" `parseTo` Cmd (NonPrint Bell)
+  describe "SGR" $ do
+    it "parses reset" $
+      "\x1b[0;m" `parseTo` Cmd (SGR [DefaultColor])
+  describe "C1" $ do
+    it "parses index" $
+      "\x1b\&D" `parseTo` Cmd (C1 Index)

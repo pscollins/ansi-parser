@@ -129,15 +129,18 @@ data Token
 scanToken ::  Alex Token
 scanToken = alexMonadScan
 
+alexGatherTokens :: Alex [Token]
+alexGatherTokens = alexMonadScan >>= collate
+  where collate TokenEOF = return [TokenEOF]
+        collate t = (t:) `liftM` alexGatherTokens
+
 alexScanTokens :: String -> Either String [Token]
-alexScanTokens inp = runAlex inp gather
-  where
-  gather = alexMonadScan >>= collate
-  collate TokenEOF = return [TokenEOF]
-  collate t = (t:) `liftM` gather
+alexScanTokens inp = runAlex inp alexGatherTokens
 
 lexWrap :: (Token -> Alex a) -> Alex a
-lexWrap = (alexMonadScan >>=)
+lexWrap cont = do
+  token <- alexMonadScan
+  trace ("lexWrap: " ++ show token) $ cont token
 
 traceThrough :: Show a => a -> a
 traceThrough x = trace ("Processing: " ++ show x) x

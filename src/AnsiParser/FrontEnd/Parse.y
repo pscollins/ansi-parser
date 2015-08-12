@@ -18,7 +18,9 @@ import Debug.Trace
   ';' { TokenSep }
   '[' { TokenLBracket }
   ']' { TokenRBracket }
+  '^D' {TokenEOF}
   'm' { TokenEndCSI 'm' Nothing }
+  NONPRINT {TokenNonPrint $$}
   PLAIN { TokenPlain $$ }
   NUM { TokenNum $$ }
   CHAR { TokenCharFunc $$ }
@@ -29,19 +31,24 @@ import Debug.Trace
 -- confuses me
 exprs :: { [Expr] }
 exprs
-  : {- empty -} { trace "exprs 30" [] }
-  | expr exprs { trace "exprs 31" $ $1 : $2 }
+  -- : {- empty -} { trace "exprs 30" [] }
+  : expr { trace "exprs 30" [$1] }
+  | exprs expr { trace "exprs 31" $ $2 : $1 }
 
+nonprint :: { Cmd }
+  : NONPRINT { NonPrint $ parseNonPrint $1}
 
 expr :: { Expr }
 expr
-  : '\x27'cmd { trace "expr 36" $ Cmd $2 }
+  : '\x27' cmd { trace "expr 36" $ Cmd $2 }
+  | nonprint {trace "expr 44" $ Cmd $ $1}
   | PLAIN { trace "expr 37" $ Plain $1 }
 
 
 numparams :: { [Int] }
 numparams
   : {- empty -} { [] }
+  | NUM {$1:[]}
   | NUM ';' numparams { $1 : $3 }
 
 colorcmd :: { [ColorCmd] }
@@ -71,12 +78,22 @@ parseChar 'E' = NextLine
 parseChar 'H' = TabSet
 parseChar  _ = undefined -- TODO
 
+parseNonPrint :: Char -> NonPrint
+parseNonPrint '\x7' = Bell
+parseNonPrint '\x5' = Enquiry
+parseNonPrint '\x8' = Backspace
+parseNonPrint '\xA' = LineFeed
+parseNonPrint '\xB' = VerticalTab
+parseNonPrint '\xC' = FormFeed
+parseNonPrint '\xD' = CarriageReturn
+parseNonPrint '\xE' = ShiftIn
+parseNonPrint '\xF' = ShiftOut
 
 parseColorParam :: Int -> ColorCmd
 parseColorParam 0 = DefaultColor
 
 parseError :: Token -> Alex a
-parseError tokens = error ("Error!" ++ show tokens)
+parseError tokens = error ("Error processing token: " ++ show tokens)
 
 -- parseExpr :: String -> [Expr]
 -- parseExpr = parseTokens . scanTokens
