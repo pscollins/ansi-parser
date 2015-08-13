@@ -18,7 +18,6 @@ import Debug.Trace
   ';' { TokenSep }
   '[' { TokenLBracket }
   ']' { TokenRBracket }
-  '^D' {TokenEOF}
   'm' { TokenEndCSI 'm' Nothing }
   NONPRINT {TokenNonPrint $$}
   PLAIN { TokenPlain $$ }
@@ -40,8 +39,8 @@ nonprint :: { Cmd }
 
 expr :: { Expr }
 expr
-  : '\x27' cmd { trace "expr 36" $ Cmd $2 }
-  | nonprint {trace "expr 44" $ Cmd $ $1}
+  -- : '\x27' cmd { trace "expr 36" $ Cmd $2 }
+  : nonprint {trace "expr 44" $ Cmd $ $1}
   | PLAIN { trace "expr 37" $ Plain $1 }
 
 
