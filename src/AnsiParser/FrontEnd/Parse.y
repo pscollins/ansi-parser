@@ -9,7 +9,7 @@ import Debug.Trace
 
 %name parseTokens
 %tokentype { Token }
-%lexer { lexWrap } { alexEOF }
+%lexer { lexWrap } { TokenEOF }
 %monad { Alex }
 %error { parseError }
 
@@ -30,8 +30,8 @@ import Debug.Trace
 -- confuses me
 exprs :: { [Expr] }
 exprs
-  -- : {- empty -} { trace "exprs 30" [] }
-  : expr { trace "exprs 30" [$1] }
+  : {- empty -} { trace "exprs 30" [] }
+  -- : expr { trace "exprs 30" [$1] }
   | exprs expr { trace "exprs 31" $ $2 : $1 }
 
 nonprint :: { Cmd }
@@ -39,8 +39,8 @@ nonprint :: { Cmd }
 
 expr :: { Expr }
 expr
-  -- : '\x27' cmd { trace "expr 36" $ Cmd $2 }
-  : nonprint {trace "expr 44" $ Cmd $ $1}
+  : '\x27' cmd { trace "expr 36" $ Cmd $2 }
+  | nonprint {trace "expr 44" $ Cmd $ $1}
   | PLAIN { trace "expr 37" $ Plain $1 }
 
 
@@ -58,7 +58,7 @@ cmd :: { Cmd }
 cmd
   : '[' csi { $2 }
   | CHAR { C1 $ parseChar $1 }
-  -- | ']' osc { undefined }
+  | ']' osc { undefined }
 
 
 
