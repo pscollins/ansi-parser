@@ -4,20 +4,6 @@ module AnsiParser.Types where
 import qualified Data.ByteString.Char8 as B
 import Data.String (IsString)
 
--- -- This lets us put off the decision about how we'll represent our characters
--- class IsString a => ConsoleString a where
---   isEscape :: a -> Bool
---   -- printable :: a ->
-
--- instance ConsoleString [Char] where
---   isEscape = ('\x27' `elem`)
-
--- instance ConsoleString B.ByteString where
---   isEscape = ('\x27' `B.elem`)
-
--- data ConsoleString a => Expr a
---   = Plain a
-
 data Color
   = Black
   | Red
@@ -65,21 +51,19 @@ data OSCmd
 --   deriving (Show, Eq)
 
 data C1
-  = Index
-  | NextLine
-  | TabSet
-  | ReverseIndex
-  | SS2 -- Single shift select of G2 character set
-  | SS3 -- like SS2, but for G3
-  | DeviceControl
-  | StartGuarded
-  | EndGuarded
-  | StartString
-  | ReturnTerminalId
-  | EndString
-  | PrivacyMessage
-  | APC -- Application program command
-  deriving (Show, Eq)
+  = Index -- = D
+  | NextLine -- = E
+  | TabSet -- = H
+  | ReverseIndex -- = M
+  | SS2 -- Single shift select of G2 character set; = N
+  | SS3 -- like SS2, but for G3; = O
+  | StartGuarded -- = V
+  | EndGuarded -- = W
+  | ReturnTerminalId -- = Z
+  | PrivacyMessage -- = ^
+  | APC -- Application program command, = _
+  deriving (Show, Eq, Enum)
+  --  not implemented: | StartString -- = X
 
 data Cmd
   = CSI Char [String] -- Control Sequence (Initiator)

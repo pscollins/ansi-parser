@@ -3,6 +3,7 @@ module Main where
 import Test.Hspec
 
 import AnsiParser.Types
+import AnsiParser.Classes
 import AnsiParser.FrontEnd.Lex
 import AnsiParser.FrontEnd.Parse
 
@@ -28,6 +29,13 @@ parseToEs s r = parse s `shouldBe` Right r
 
 parseTo :: String -> Expr -> Expectation
 parseTo s r = s `parseToEs` [r]
+
+mkSimpleTest :: ToTerminal a => (a -> Expr) -> a -> SpecWith ()
+mkSimpleTest toExpr expected =
+  it ("parses " ++ show toParse) $
+  toParse `parseTo`  toExpr expected
+  where toParse = toTerminal expected
+
 
 main :: IO ()
 main = hspec $ do
@@ -87,8 +95,10 @@ main = hspec $ do
   describe "plain text" $ do
     it "parses the empty string" $
       "" `parseToEs` []
-    it "parses plain text" $
+    it "parses a non-empty string" $
       "Hello World" `parseTo` Plain "Hello World"
+  describe "C1 commands" $
+    mapM_ (mkSimpleTest (Cmd . C1)) [Index .. APC]
   describe "cmd" $ do
     it "parses a nonprinting character" $
       "\x7" `parseTo` Cmd (NonPrint Bell)

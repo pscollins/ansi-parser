@@ -2,6 +2,7 @@
 module AnsiParser.FrontEnd.Parse where
 
 import AnsiParser.Types
+import AnsiParser.Classes
 import AnsiParser.FrontEnd.Lex
 
 import Debug.Trace
@@ -31,7 +32,6 @@ import Debug.Trace
 exprs :: { [Expr] }
 exprs
   : {- empty -} { trace "exprs 30" [] }
-  -- : expr { trace "exprs 30" [$1] }
   | exprs expr { trace "exprs 31" $ $2 : $1 }
 
 nonprint :: { Cmd }
@@ -72,10 +72,7 @@ osc : { undefined }
 
 {
 parseChar :: Char -> C1
-parseChar 'D' = Index
-parseChar 'E' = NextLine
-parseChar 'H' = TabSet
-parseChar  _ = undefined -- TODO
+parseChar  = fromTerminal . addEsc
 
 parseNonPrint :: Char -> NonPrint
 parseNonPrint '\x7' = Bell
