@@ -73,7 +73,6 @@ data Cmd
   | C1 C1
   deriving (Show, Eq)
 
-
 data NonPrint
   = Bell
   | Backspace
@@ -84,7 +83,7 @@ data NonPrint
   | ShiftIn
   | ShiftOut
   | VerticalTab
-  deriving (Show, Eq)
+  deriving (Show, Eq, Ord, Enum)
 
 data Expr
   = Plain String
