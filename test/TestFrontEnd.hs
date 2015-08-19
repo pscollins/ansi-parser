@@ -99,6 +99,8 @@ main = hspec $ do
       "Hello World" `parseTo` Plain "Hello World"
   describe "C1 commands" $
     mapM_ (mkSimpleTest (Cmd . C1)) [Index .. APC]
+  describe "nonprinting characters" $
+    mapM_ (mkSimpleTest (Cmd . NonPrint)) [Bell .. VerticalTab]
   describe "cmd" $ do
     it "parses a nonprinting character" $
       "\x7" `parseTo` Cmd (NonPrint Bell)

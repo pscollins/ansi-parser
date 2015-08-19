@@ -35,7 +35,7 @@ exprs
   | exprs expr { trace "exprs 31" $ $2 : $1 }
 
 nonprint :: { Cmd }
-  : NONPRINT { NonPrint $ parseNonPrint $1}
+  : NONPRINT { NonPrint $ fromTerminal $ return $1}
 
 expr :: { Expr }
 expr
@@ -73,17 +73,6 @@ osc : { undefined }
 {
 parseChar :: Char -> C1
 parseChar  = fromTerminal . addEsc
-
-parseNonPrint :: Char -> NonPrint
-parseNonPrint '\x7' = Bell
-parseNonPrint '\x5' = Enquiry
-parseNonPrint '\x8' = Backspace
-parseNonPrint '\xA' = LineFeed
-parseNonPrint '\xB' = VerticalTab
-parseNonPrint '\xC' = FormFeed
-parseNonPrint '\xD' = CarriageReturn
-parseNonPrint '\xE' = ShiftIn
-parseNonPrint '\xF' = ShiftOut
 
 parseColorParam :: Int -> ColorCmd
 parseColorParam 0 = DefaultColor

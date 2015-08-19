@@ -36,20 +36,6 @@ data OSCmd
   | Font String
   deriving (Show, Eq)
 
--- data ControlChar
---   = Bell
---   | Backspace
---   | CarriageReturn
---   | Enq -- Return terminal status
---   | NewPage
---   | NewLine
---   | ShiftIn
---   | ShiftOut
---   | Space
---   | HorizontalTab
---   | VerticalTab
---   deriving (Show, Eq)
-
 data C1
   = Index -- = D
   | NextLine -- = E
@@ -62,7 +48,7 @@ data C1
   | ReturnTerminalId -- = Z
   | PrivacyMessage -- = ^
   | APC -- Application program command, = _
-  deriving (Show, Eq, Enum)
+  deriving (Show, Eq, Enum, Ord)
   --  not implemented: | StartString -- = X
 
 data Cmd
